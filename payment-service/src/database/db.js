@@ -1,4 +1,3 @@
-
 import pg from 'pg';
 
 const { Pool } = pg;
@@ -32,8 +31,16 @@ export async function initializeDatabase() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       published_at TIMESTAMP NULL,
       attempts INTEGER DEFAULT 0,
-      last_error TEXT NULL
+      last_error TEXT NULL,
+      next_attempt_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+  `);
+
+  // Atualiza bancos que já existiam antes dessa coluna.
+  await pool.query(`
+    ALTER TABLE outbox_events
+    ADD COLUMN IF NOT EXISTS next_attempt_at
+    TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
   `);
 
   await pool.query(`
