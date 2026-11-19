@@ -1,0 +1,52 @@
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: comprefacil-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: comprefacil
+      POSTGRES_PASSWORD: comprefacil123
+      POSTGRES_DB: comprefacil
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comprefacil -d comprefacil"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-notifications:
+    image: postgres:17
+    container_name: comprefacil-notifications-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: notifications
+      POSTGRES_PASSWORD: notifications123
+      POSTGRES_DB: notifications
+    ports:
+      - "5433:5432"
+    volumes:
+      - notifications_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notifications -d notifications"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: comprefacil-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: comprefacil
+      RABBITMQ_DEFAULT_PASS: comprefacil123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  postgres_data:
+  notifications_data:
